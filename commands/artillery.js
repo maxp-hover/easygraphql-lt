@@ -42,20 +42,27 @@ function runArtillery () {
     questions.push(options)
   }
 
+  let schemaPath = null;
+
   if (localSchema) {
-    const files = [].concat(getFiles('.gql', true), getFiles('.graphql', true))
-    const options = {
-      type: 'list',
-      name: 'localSchemaName',
-      message: 'Local schema file:',
-      choices: files
+    if (localSchema == true) { // Will show file selection dialog
+      const files = [].concat(getFiles('.gql', true), getFiles('.graphql', true))
+      const options = {
+        type: 'list',
+        name: 'localSchemaName',
+        message: 'Local schema file:',
+        choices: files
+      }
+      questions.push(options)
+    } else { // filename was given from command line
+      schemaPath = localSchema;
     }
-    questions.push(options)
   }
 
   inquirer.prompt(questions).then(answers => {
     fileName = fileName || answers['configFile']
-    const localSchemaName = answers['localSchemaName']
+    const localSchemaName = schemaPath || answers['localSchemaName'];
+    console.log(`using schema file: ${localSchemaName}`);
     const configFile = filePath ? path.join(path.resolve(), filePath, fileName) : path.join(path.resolve(), fileName)
 
     startLoadTesting(configFile, localSchemaName)
