@@ -1,0 +1,3 @@
+[submodule "easygraphql-load-tester"]
+	path = easygraphql-load-tester
+	url = https://github.com/EasyGraphQL/easygraphql-load-tester
