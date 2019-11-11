@@ -15,7 +15,7 @@ function runArtillery () {
   const arg = argv._.length > 0 ? argv._[0] : false
   const localSchema = argv.localSchema ? argv.localSchema : false
 
-  if (arg && arg.includes('.json') && fs.existsSync(arg)) {
+  if (arg && fs.existsSync(arg)) {
     fileName = arg
   } else if (arg && fs.existsSync(arg)) {
     const files = getFiles('.json')

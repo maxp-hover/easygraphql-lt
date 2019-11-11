@@ -10,6 +10,7 @@ const schema = fs.readFileSync(path.join(__dirname, 'schema.gql'), 'utf8')
 
 const easyGraphQLLoadTester = new EasyGraphQLLoadTester(schema, args)
 
+
 const options = {
   selectedQueries,
   queryFile,

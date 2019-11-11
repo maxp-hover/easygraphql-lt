@@ -1,0 +1,1631 @@
+type ACLAccess implements ApplicationRecord {
+  aclTemplate: ACLTemplateOptions
+  createdAt: ISO8601DateTime
+  id: Int!
+  orgId: Int
+  updatedAt: ISO8601DateTime
+}
+
+enum ACLTemplateOptions {
+  ADMIN
+  PERSONAL
+  PRO_PLUS
+}
+
+interface ApplicationRecord {
+  createdAt: ISO8601DateTime
+  id: Int!
+  updatedAt: ISO8601DateTime
+}
+
+type AppliedDiscount implements ApplicationRecord {
+  code: String
+  createdAt: ISO8601DateTime
+  details: [String!]!
+  expiration: String!
+
+  """
+  Determines if the discount can still be used
+  """
+  expired: Boolean!
+  id: Int!
+  name: String!
+
+  """
+  Human readable created at
+  """
+  redeemedOn: String!
+
+  """
+  Remaining number of jobs this discount can be used for. Null means there is no limit.
+  """
+  remainingJobsCount: Int
+
+  """
+  Determines if the partner subsidises the discount
+  """
+  subsidy: Boolean!
+  updatedAt: ISO8601DateTime
+}
+
+type AuthenticationResponse {
+  jwt: JWT!
+  user: User!
+}
+
+type BasePrice implements ApplicationRecord {
+  createdAt: ISO8601DateTime
+  goodType: String!
+  id: Int!
+  partnerSubsidy: Int!
+  planId: Int!
+
+  """
+  Price in cents
+  """
+  price: Int!
+  updatedAt: ISO8601DateTime
+}
+
+type BillableWallet {
+  allowedGoodTypes: [String!]!
+  org: OrgBasicInfo!
+  preferred: Boolean!
+  shared: Boolean!
+  walletId: Int!
+}
+
+"""
+All URLs here are signed S3 URLs for downloading a logo's image with different dimensions or format.
+Image dimensions are in pixels. Image format is PNG.
+"""
+type Brand implements ApplicationRecord {
+  clientBrandingLogoUrl: String
+  createdAt: ISO8601DateTime
+  id: Int!
+
+  """
+  Dimensions: 200x35
+  <br />
+  Format: png
+  """
+  logoNonretinaUrl: String
+
+  """
+  Dimensions: 400x70
+  <br />
+  Format: png
+  """
+  logoRetinaUrl: String
+
+  """
+  Dimensions: 115x20
+  <br />
+  Format: png
+  """
+  logoThumbUrl: String
+
+  """
+  Dimensions: as originally uploaded
+  <br />
+  Format: png
+  """
+  logoUrl: String
+
+  """
+  Dimensions: as originally uploaded
+  <br />
+  Format: png
+  """
+  placesLogoUrl: String
+  primaryColor: String
+  secondaryColor: String
+  tertiaryColor: String
+  updatedAt: ISO8601DateTime
+}
+
+type CaptureRequest implements ApplicationRecord {
+  capturingUser: UserBasicInfo
+  capturingUserEmail: String!
+  capturingUserName: String!
+  capturingUserPhone: String
+  createdAt: ISO8601DateTime
+  id: Int!
+  identifier: String!
+  jobId: Int
+  requestingUser: UserBasicInfo
+  signupType: CaptureRequestSignupTypes!
+  state: CaptureRequestStates
+  updatedAt: ISO8601DateTime
+}
+
+"""
+Arguments for job attributes when creating a capture request
+"""
+input CaptureRequestJobArgs {
+  """
+      This is any arbitrary string that clients want to use to identify jobs. Clients in this case means the actual
+      software clients that are uploading the job. For example: mobile applications, website, and any software that 3rd
+      parties build to interact with our system. This is typically used to help with the uploading process. Our uploading
+      process is asyncronous and does not return a Job ID when you upload. Including a client_identifier in your upload
+      and checking the client identifier of new jobs that enter your account is the only way to match up what you
+      uploaded with the resulting job. The given value must be globally unique.
+  """
+  clientIdentifier: String
+
+  """
+      True if the contractor has checked the box to remind them to contact the customer. Default is false.
+  """
+  customerContact: Boolean
+
+  """
+      True if the contractor has checked the box to only contact the customer by email. Default is false.
+  """
+  customerContactOnlyByEmail: Boolean
+
+  """
+      The email address of the customer. Usually the homeowner.
+  """
+  customerEmail: String
+
+  """
+      The name of the customer. Usually the homeowner.
+  """
+  customerName: String
+
+  """
+      The phone number of the customer. Usually the homeowner.
+  """
+  customerPhone: String
+
+  """
+      Refer to "available_deliverables" in the "Org" object.
+  """
+  deliverableId: Int
+
+  """
+      An identifier generated/entered by the customer. This can be anything you want. It can be used to
+      reference an ID in the customer application's database. This field can only be updated by the job's
+      creator or admins of the job's org.
+  """
+  externalIdentifier: String
+
+  """
+  The city of this job's address.
+  """
+  locationCity: String
+
+  """
+  The country of the job's address.
+  """
+  locationCountry: String
+
+  """
+  The latitude of the job's address.
+  """
+  locationLat: String
+
+  """
+      First line of this job's address.
+  """
+  locationLine1: String!
+
+  """
+      Second line of this job's address.
+  """
+  locationLine2: String
+
+  """
+  The longitude of the job's address.
+  """
+  locationLon: String
+
+  """
+  The postal code of the job's address.
+  """
+  locationPostalCode: String
+
+  """
+  The state/region of this job's address.
+  """
+  locationRegion: String
+
+  """
+  A name for this job.
+  """
+  name: String
+
+  """
+  True if the job is shared. Default is false.
+  """
+  shared: Boolean
+
+  """
+      When set to true, all emails (including capture request emails) related to this job will be suppressed. Default is
+      false.
+  """
+  suppressEmail: Boolean
+
+  """
+      This optional parameter causes a job to be a "test" job and to skip our processing pipeline. "COMPLETE" auto
+      completes your job with example results. "FAILED" automatically fails the job. This parameter should not be used on
+      real jobs.
+  """
+  testState: JobTestStates = NO
+
+  """
+      Set the wallet_id to use for this job. Refer to "billableWallets" in the "Org" object.
+  """
+  walletId: Int
+}
+
+"""
+          Paginated results for a given type. Total pages or count is not provided. Instead, an hasNextPage boolean is
+          provided.
+"""
+type CaptureRequestPaginatedResults {
+  pagination: PaginationWithoutCount
+  results: [CaptureRequest]
+}
+
+enum CaptureRequestSignupTypes {
+  HOMEOWNER
+  PRO
+}
+
+enum CaptureRequestStates {
+  COMPLETE
+  CONNECTED
+  NEW
+}
+
+enum Complexities {
+  AVERAGE
+  COMPLEX
+  CUSTOM
+  SIMPLE
+  SUPER_CUSTOM
+}
+
+type Deliverable implements ApplicationRecord {
+  createdAt: ISO8601DateTime
+  id: Int!
+  name: String
+  updatedAt: ISO8601DateTime
+}
+
+type DeliverableChangeRequest implements ApplicationRecord {
+  """
+  Time of this change happened at.
+  """
+  changedAt: ISO8601DateTime
+  createdAt: ISO8601DateTime
+
+  """
+  Error message if this change request failed.
+  """
+  error: String
+  id: Int!
+
+  """
+  Deliverable that this request will change to.
+  """
+  newDeliverable: Deliverable
+
+  """
+  Deliverable that this request will change from.
+  """
+  oldDeliverable: Deliverable
+  state: DeliverableChangeRequestStates
+  updatedAt: ISO8601DateTime
+
+  """
+  The user that created this request.
+  """
+  user: UserBasicInfo
+}
+
+enum DeliverableChangeRequestStates {
+  COMPLETE
+  FAILED
+  FIRST_ATTEMPT
+  SECOND_ATTEMPT
+  WAITING_FOR_JOB_TO_FINISH
+}
+
+type FeatureAccess implements ApplicationRecord {
+  accessorId: Int
+  accessorType: String
+  createdAt: ISO8601DateTime
+  enabled: Boolean!
+  id: Int!
+  identifier: FeatureAccessIdentifier
+  updatedAt: ISO8601DateTime
+}
+
+enum FeatureAccessIdentifier {
+  ANALYTICS_ORG
+  ANALYTICS_PARTNER
+  DESIGN_VIEW_MEASUREMENTS_TOOL
+  EHI_PROJECT_MANAGEMENT_PRODUCT
+  EMAIL_SEND_RECEIPT
+  EMAIL_SHOW_RECEIPT_AGGREGATE_DISCOUNTS_AND_BASE_PRICE_SUBSIDY
+  EMAIL_SHOW_RECEIPT_BASE_PRICE_SUBSIDY
+  EXPEDITE_ROOF_ONLY_JOBS_AUTOMATICALLY
+  EXPORT_ADVANCED_JOB
+  HOVER_NOW
+  INTEGRATIONS
+  LEAD_AUTO_ASSIGN
+  LEAD_HOMEOWNER_CAPTURE
+  LOAN_CALL_TO_ACTION
+  MATERIAL_ORDERING
+  MATERIAL_ORDERING_BEACON
+  MEASUREMENTS_CO_BRAND
+  MEASUREMENTS_FILES_ACCESS
+  ORG_JOBS_DAILY_ZIP_EXPORT
+  PROSPECT
+  SALES_ESTIMATION
+  TEAM_MANAGEMENT_ADVANCED
+  TEAM_MANAGEMENT_BASIC
+  UPGRADE_TO_PRO
+}
+
+"""
+An ISO 8601-encoded datetime
+"""
+scalar ISO8601DateTime
+
+type JWT {
+  accessToken: String!
+  expiresIn: Int!
+  refreshToken: String!
+}
+
+type Job implements ApplicationRecord {
+  approved: Boolean
+  approvedAt: ISO8601DateTime
+  approvingUser: UserBasicInfo
+  archived: Boolean!
+
+  """
+      Returns an array of deliverables that the current_user can request an upgrade for this job using the
+      createDeliverableChangeRequest mutation.
+  """
+  availableDeliverableUpgrades: [Deliverable!]!
+
+  """
+      Return the best front-view image that we could find for this job. If there isn't any front-view image for this job,
+      it will return one of job's images (if there is any).
+  """
+  bestFrontImage: JobImage
+  captureRequest: CaptureRequest
+  capturedBy: UserBasicInfo
+  capturedUserId: Int @deprecated(reason: "This is contained in capturedBy")
+  clientIdentifier: String
+  createdAt: ISO8601DateTime
+  createdBy: UserBasicInfo
+
+  """
+      Contain information of this job related to the current_user.
+  """
+  currentUserContext: JobCurrentUserContext!
+  deliverable: Deliverable
+
+  """
+      Return all deliverable change requests for this job.
+  """
+  deliverableChangeRequests: [DeliverableChangeRequest!]!
+  estimatedHoursToCompletion: Float
+  example: Boolean
+  externalIdentifier: String
+  id: Int!
+
+  """
+  Return all the images for this job
+  """
+  images: [JobImage!]!
+
+  """
+      Contains job labels that represents various job status and states. This acts as a translation of internal states
+      and properties of a job into labels that FE can consume easier.
+  """
+  labels: [JobLabels!]!
+  locationCity: String
+  locationCountry: String
+  locationLat: String
+  locationLine1: String
+  locationLine2: String
+  locationLon: String
+  locationPostalCode: String
+  locationRegion: String
+  measurements: JobMeasurements
+
+  """
+      Reason of modeling failure. Will be null unless state field is FAILED.
+  """
+  modelFailureReason: String
+  name: String
+
+  """
+        Returns job notes that are visible to current user ordered by job created_at timestamp. If current
+        user is a pro, current user can see their own notes plus all the homeowner notes on this job.
+  """
+  notes(page: Int = 1, perPage: Int = 50): NotePaginatedResults!
+  orgId: Int
+
+  """
+  HOVER Now details
+  """
+  roofEstimate: RoofEstimate
+  roofEstimateAccessLevel: RoofEstimateAccessLevels!
+  state: JobModelStates
+  threeDFiles: JobThreeDFiles
+  updatedAt: ISO8601DateTime
+  userId: Int @deprecated(reason: "This is contained in createdBy")
+}
+
+type JobBasePrice implements ApplicationRecord {
+  complexity: Complexities!
+  createdAt: ISO8601DateTime
+  deliverable: Deliverable!
+
+  """
+  The number of facets or polygons that a job requires to model
+  """
+  facetRange: String!
+  goodType: String!
+  id: Int!
+  partnerSubsidy: Int!
+  planId: Int!
+
+  """
+  Price in cents
+  """
+  price: Int!
+  updatedAt: ISO8601DateTime
+}
+
+type JobCurrentUserContext {
+  """
+  Return true if current_user is assigned to this job.
+  """
+  assignedToMe: Boolean!
+
+  """
+  Return true if the current_user can approve this job.
+  """
+  canApprove: Boolean!
+
+  """
+  Return true if the current_user can archive this job.
+  """
+  canArchive: Boolean!
+
+  """
+      Return true if a pending capture request is sent by the current_user.
+  """
+  captureRequestSentByMe: Boolean!
+
+  """
+      Return true if a pending capture request is sent to the current_user.
+  """
+  captureRequestSentToMe: Boolean!
+
+  """
+  Return true if current_user created this job.
+  """
+  createdByMe: Boolean!
+}
+
+"""
+    All URLs here are signed S3 URLs for downloading a job's image with different dimensions or quality. The URL will
+    expire in 10 minutes from the time of the request.
+
+    Sometimes the uploaded images might not be in the correct orientation and we attempt to correct them when we
+    process the images. You may use the rotated_image_url, rotated_image_small_size_url, rotated_image_medium_size_url,
+    or rotated_image_low_quality_url to get these images that we attempted to fix.
+
+    Image dimensions are in pixels.
+
+    Image quality for JPEG is defined as 1 (lowest image quality and highest compression) to 100 (best quality but
+    least effective compression).
+"""
+type JobImage {
+  createdAt: ISO8601DateTime
+
+  """
+      Represents the position of the image being taken in respective of the building. Values other than the ones listed
+      below can be ignored.
+
+      - FRONT: 0
+      - FRONT_RIGHT: 1
+      - RIGHT: 2
+      - BACK_RIGHT: 3
+      - BACK: 4
+      - BACK_LEFT: 5
+      - LEFT: 6
+      - FRONT_LEFT: 7
+  """
+  cubeFace: Int
+  id: Int!
+
+  """
+  Dimensions: as originally uploaded
+  <br />
+  Quality: 50
+  """
+  imageLowQualityUrl: String
+
+  """
+  Dimensions: 800x800
+  <br />
+  Quality: 60
+  """
+  imageMediumUrl: String
+
+  """
+  Dimensions: 200x200
+  <br />
+  Quality: 60
+  """
+  imageSmallUrl: String
+
+  """
+  Dimensions: as originally uploaded
+  <br />
+  Quality: as originally uploaded
+  """
+  imageUrl: String
+  imageVersion: Int!
+
+  """
+      Represents the kind of image. STANDARD for EHI (3D and measurements); DAMAGE/UNDERWRITING for insurance.
+  """
+  kind: JobImageKinds
+
+  """
+  Dimensions: as originally uploaded
+  <br />
+  Quality: 50
+  """
+  rotatedImageLowQualityUrl: String
+
+  """
+  Dimensions: 800x800
+  <br />
+  Quality: 60
+  """
+  rotatedImageMediumUrl: String
+
+  """
+  Dimensions: 200x200
+  <br />
+  Quality: 60
+  """
+  rotatedImageSmallUrl: String
+
+  """
+  Dimensions: as originally uploaded
+  <br />
+  Quality: as originally uploaded
+  """
+  rotatedImageUrl: String
+  rotatedImageVersion: Int!
+
+  """
+      Represents whether this is an exterior or interior image.
+  """
+  viewpoint: JobImageViewpoints!
+}
+
+enum JobImageKinds {
+  DAMAGE
+  STANDARD
+  UNDERWRITING
+}
+
+enum JobImageViewpoints {
+  EXTERIOR
+  INTERIOR
+}
+
+enum JobLabels {
+  """
+  When job requires approval, and current_user is not an Org admin.
+  """
+  AWAITING_APPROVAL
+
+  """
+  When job state is CANCELLED.
+  """
+  CANCELLED
+
+  """
+  When job state is COMPLETE.
+  """
+  DONE
+
+  """
+            When the difference between now and job's completedAt exceeds the number of days of historical job access the
+            plan of the current user's org includes.
+  """
+  LIMITED_ACCESS
+
+  """
+            When job state is FAILED, and job is uploaded manually by HOVER
+            support.
+  """
+  MANUAL_UPLOAD_FAILED
+
+  """
+  When job requires approval, and current_user is an Org admin.
+  """
+  NEEDS_APPROVAL
+
+  """
+  When job state is PAYING, and job payment failed.
+  """
+  PAYMENT_FAILED
+
+  """
+            When job state is not in one of the states: 
+            COMPLETE,
+            FAILED,
+            CANCELLED.
+  """
+  PROCESSING
+
+  """
+  When job state is FAILED, and job is uploaded by user.
+  """
+  USER_UPLOAD_FAILED
+}
+
+"""
+    For HOVER Now (roof_estimate), all urls will return null.
+
+    TLA/TLA+ only support pdfUrl and summarizedJsonUrl. All other urls for TLA/TLA+ will return null.
+"""
+type JobMeasurements {
+  """
+  Full version of the measurements JSON file.
+  """
+  fullJsonUrl: String
+
+  """
+      A signed URL to download the measurements JSON file. The URL will expire in 10 
+      minutes from the time of the request.
+  """
+  jsonUrl: String
+
+  """
+      A signed URL to download the measurements PDF file. The URL will expire in 10 
+      minutes from the time of the request.
+  """
+  pdfUrl: String
+
+  """
+  Summarized version of the measurements JSON file.
+  """
+  summarizedJsonUrl: String
+  version: Int!
+}
+
+enum JobModelStates {
+  CANCELLED
+  COMPLETE
+  FAILED
+  PAYING
+  PROCESSING
+  PROCESSING_UPLOAD
+  PROCESSING_UPLOAD_FOR_IMPROVEMENTS
+  REQUESTING_CORRECTIONS
+  REQUESTING_IMPROVEMENTS
+  RETRIEVING
+  SUBMITTING
+  UPLOADING
+  WAITING_APPROVAL
+  WAITLISTED
+  WORKING
+}
+
+"""
+Paginated results for a given type
+"""
+type JobPaginatedResults {
+  pagination: Pagination
+  results: [Job]
+}
+
+enum JobSearchFilters {
+  NEEDS_APPROVAL
+}
+
+enum JobTestStates {
+  COMPLETE
+  FAILED
+  NO
+}
+
+"""
+    All URLs here are pre-signed S3 URLs for downloading a job's 3D files. The URLs will expire in
+    10 minutes from the time of the request.
+
+    The URLs will return null if the 3D files are not available yet.
+
+    JobThreeDFiles will return null if:
+    
+    <ul>
+      <li>the job has not been paid for</li>
+      <li>the current_user's access to the job has been expired (refer to daysOfHistoricalJobAccess under Plan)</li>
+    </ul>
+"""
+type JobThreeDFiles {
+  """
+      A signed URL to download the 3D geometry data of this job in JSON format
+  """
+  geometryUrl: String
+
+  """
+      A signed URL to download the 3D metadata of this job in JSON format
+  """
+  metadataUrl: String
+}
+
+"""
+Arguments for updating a job
+"""
+input JobUpdateArgs {
+  """
+      An identifier generated/entered by the customer. This can be anything you want. It can be used to
+      reference an ID in the customer application's database. This field can only be updated by the job's
+      creator or admins of the job's org.
+  """
+  externalIdentifier: String
+
+  """
+  The city of this job's address.
+  """
+  locationCity: String
+
+  """
+  The country of the job's address.
+  """
+  locationCountry: String
+
+  """
+  The latitude of the job's address.
+  """
+  locationLat: String
+
+  """
+      First line of this job's address.
+  """
+  locationLine1: String
+
+  """
+      Second line of this job's address.
+  """
+  locationLine2: String
+
+  """
+  The longitude of the job's address.
+  """
+  locationLon: String
+
+  """
+  The postal code of the job's address.
+  """
+  locationPostalCode: String
+
+  """
+  The state/region of this job's address.
+  """
+  locationRegion: String
+
+  """
+  A name for this job.
+  """
+  name: String
+}
+
+enum JobsViewableBy {
+  ALL
+  ME
+  TEAM
+}
+
+enum MobileApplicationOS {
+  ANDROID
+  IOS
+}
+
+type MobileDevice implements ApplicationRecord {
+  createdAt: ISO8601DateTime
+  id: Int!
+
+  """
+      The token from registering device with ios - Apple Push Notification(APN) or android - Firebase Cloud Messaging(FCM).
+      It's an app-specific device token.
+  """
+  token: String
+  updatedAt: ISO8601DateTime
+
+  """
+  UUID of the mobile device.
+  """
+  uuid: String
+}
+
+"""
+Arguments for registering a mobile device for push notifications
+"""
+input MobileDeviceArgs {
+  """
+      The token from registering device with ios - Apple Push Notification(APN) or android - Firebase Cloud Messaging(FCM).
+      It's an app-specific device token.
+  """
+  token: String!
+
+  """
+  UUID of the mobile device.
+  """
+  uuid: String
+}
+
+type Mutation {
+  addDiscountFromCode(code: String!, orgId: Int!): AppliedDiscount!
+
+  """
+  Approve a job with the given ID. Only an Org Admin can approve jobs.
+  """
+  approveJob(
+    """
+    ID of the job to be updated
+    """
+    id: Int!
+  ): Job!
+
+  """
+      Archive a job with the given ID. Example jobs cannot be archived. Only jobs in the following
+      JobModelStates can be archived: UPLOADING, PROCESSING_UPLOAD, COMPLETE, FAILED, CANCELLED
+  """
+  archiveJob(
+    """
+    ID of the job to be updated
+    """
+    id: Int!
+  ): Job!
+  authenticate(email: String!, password: String!): AuthenticationResponse!
+  authenticateWithCookie: AuthenticationResponse!
+
+  """
+      Authenticate using a previously issued user signin token. Each user signin
+      token is only valid to be used once and will be deleted after successful authentication.
+  """
+  authenticateWithUserSigninToken(userSigninToken: String!): AuthenticationResponse!
+  createCaptureRequest(capturingUserEmail: String!, capturingUserName: String!, capturingUserPhone: String, job: CaptureRequestJobArgs!, signupType: CaptureRequestSignupTypes): CaptureRequest!
+
+  """
+      Create a deliverable change request for a job. Upgrade only. A job can only have 1 pending (not complete or failed)
+      deliverable change request at a time.
+  """
+  createDeliverableChangeRequest(
+    """
+    ID of the job for this change request.
+    """
+    jobId: Int!
+
+    """
+    ID of the deliverable to upgrade to.
+    """
+    newDeliverableId: Int!
+  ): DeliverableChangeRequest!
+  createHomeowner(distinctId: String, orgCode: String, user: UserArgs!): AuthenticationResponse!
+
+  """
+      Create a note for the job with the given ID. Users can only create notes for jobs their
+      org has access to.
+  """
+  createNote(jobId: Int!, note: NoteArgs!): Note!
+
+  """
+      This mutation adds a user in an org with the given orgId. It also sends an invitation email to the new user.
+
+      Requires the current user to have permission to add users in the given org, i.e., org admin.
+
+      If a user with the given email already exists, it will return an error message.
+
+      If aclTemplate is given, and the current user does not have permission to manage permissions, it will return an
+      error message.
+  """
+  createOrgUser(aclTemplate: ACLTemplateOptions, orgId: Int!, user: OrgUserCreateArgs!): User!
+  createProUser(distinctId: String, org: OrgArgs!, orgCode: String, user: UserArgs!): AuthenticationResponse!
+
+  """
+      Delete a capture request with the given ID. A capture request can only be
+      deleted by its requesting user. Capture requests in the COMPLETE state
+      cannot be deleted.
+  """
+  deleteCaptureRequest(
+    """
+    ID of the capture request to be deleted
+    """
+    id: Int!
+  ): CaptureRequest!
+
+  """
+      Delete a note with the given ID. The user must have access to the note's job and org.
+  """
+  deleteNote(
+    """
+    ID of the note to be deleted
+    """
+    id: Int!
+  ): Note!
+  refreshJwt(refreshToken: String!): JWT!
+
+  """
+      This mutation registers user's mobile device for push notifications.
+
+      It will look for existing mobile device records by the UUID, then by token. If there isn't a matching
+      mobile device record, it creates a new mobile device record.
+
+      If the attempt is successful, the mobile device is ready to receive push notifications.
+
+      If the attempt is not successful, it will return an error message.
+  """
+  registerMobileDevice(
+    """
+        App bundle id. A string identifier for the application.
+    """
+    identifier: String!
+    mobileDevice: MobileDeviceArgs!
+
+    """
+        The operating system for which the application was created. ios or android.
+    """
+    os: MobileApplicationOS!
+  ): MobileDevice!
+
+  """
+      Removes a team member's access to the org given their user_id and org_id. 
+      It returns user details on successful removal. This will log the removed user
+      out of the app.
+  """
+  removeTeamMember(
+    """
+    Org Id of the team member's org
+    """
+    orgId: Int!
+
+    """
+    User Id of the team member who is being removed
+    """
+    userId: Int!
+  ): User!
+  resetPassword(
+    """
+    Valid password character length: 8..128.
+    """
+    password: String!
+
+    """
+    Refer to sendResetPasswordInstructions mutation.
+    """
+    resetPasswordToken: String!
+  ): AuthenticationResponse!
+
+  """
+  Sends an email invite and an SMS, if a phone number of the capturing user is provided, for capturing property
+  """
+  sendCaptureRequestNotification(
+    """
+    id of the capture request
+    """
+    id: Int!
+  ): CaptureRequest!
+
+  """
+      Sends a reset password email to a user with the given email address if it exists. In the email, a Branch IO link is
+      included with action=reset_password and reset_password_token={some_reset_password_token} for deep linking purposes.
+      The reset_password_token can then be used in the resetPassword mutation. A reset_password_token can only be used
+      for one time. If you are requesting this mutation for more than one time for the same email address, only the
+      latest reset_password_token will be valid.
+
+      This mutation will always return true.
+  """
+  sendResetPasswordInstructions(email: String!): Boolean!
+
+  """
+  Un-archive a job with the given ID. Only Org Admin can un-archive a job.
+  """
+  unarchiveJob(
+    """
+    ID of the job to be updated
+    """
+    id: Int!
+  ): Job!
+
+  """
+      This mutation allows updating a job.
+  """
+  updateJob(id: Int!, job: JobUpdateArgs!): Job!
+
+  """
+      This mutation allows updating the body of a note. Only the owner of the note can perform
+      this action(the user_id on note record needs to match current_user id).
+  """
+  updateNote(id: Int!, note: NoteArgs!): Note!
+
+  """
+      This mutation allows a user to update an org's name if that user has permission to manage that org, i.e. org admin.
+  """
+  updateOrg(org: OrgArgs!, orgId: Int!): Org!
+
+  """
+      This mutation allows the current user to update a user's firstName, lastName, mobilePhone, officePhone, and/or
+      requireJobApproval.
+
+      If the id argument is given, it will attempt to update the target user with the given id provided that the
+      current_user is an Org admin of the target user.
+
+      If the id argument is not given, it will update the current_user.
+
+      Only Org admin can modify requireJobApproval. If requireJobApproval arg is given and the user does not have
+      permission to modify it, it will return an error message and no update will be performed.
+  """
+  updateUser(id: Int, user: UserUpdateArgs!): User!
+
+  """
+  This mutation allows an org admin to update a user's ACL template
+  """
+  updateUserAclTemplate(aclTemplate: ACLTemplateOptions!, orgId: Int!, userId: Int!): User!
+
+  """
+  This mutation allows the current user to update its own settings for an Org.
+  """
+  updateUserOrgSettings(
+    """
+        Set to true if the user should be cc'ed on certain job and payment related emails within the org. Refer to the
+        OrgCurrentUserContext object.
+
+        This argument will only have effect for Org admin.
+    """
+    ccAdminOnEmails: Boolean
+    orgId: Int!
+  ): User!
+  updateWallet(wallet: WalletArgs!, walletId: Int!): Wallet!
+}
+
+type Note implements ApplicationRecord {
+  body: String
+  createdAt: ISO8601DateTime
+
+  """
+      Information on whether current_user can update or delete the note
+  """
+  currentUserContext: NoteCurrentUserContext!
+  id: Int!
+  org: OrgBasicInfo
+  updatedAt: ISO8601DateTime
+  user: UserBasicInfo
+}
+
+"""
+Arguments for creating a note
+"""
+input NoteArgs {
+  """
+  The note's text
+  """
+  body: String!
+}
+
+type NoteCurrentUserContext {
+  canDeleteNote: Boolean!
+  canUpdateNote: Boolean!
+}
+
+"""
+          Paginated results for a given type. Total pages or count is not provided. Instead, an hasNextPage boolean is
+          provided.
+"""
+type NotePaginatedResults {
+  pagination: PaginationWithoutCount
+  results: [Note]
+}
+
+type Org implements ApplicationRecord & OrgNames {
+  ancestralName: String
+
+  """
+  A list of discounts that has been applied to this org.
+  """
+  appliedDiscounts(ids: [Int!] = []): [AppliedDiscount!]
+
+  """
+      Returns the deliverables available for this org / user. First it checks org settings.
+      If there is no deliverable under settings then it returns partner deliverables, else it returns an empty array.
+      If the org's plan allows instant estimate then the roof estimate deliverable (HOVER Now) is included too.
+      But if jobs require approval for the user than HOVER Now is removed,
+      unless the org setting has auto approve roof estimate.
+  """
+  availableDeliverables: [Deliverable!]!
+
+  """
+  A list of wallets that this org can use for billing.
+  """
+  billableWallets: [BillableWallet!]!
+
+  """
+  The brand of this org. It includes company logo and RGB color scheme
+  """
+  brand: Brand
+  createdAt: ISO8601DateTime
+
+  """
+      Contain information of this org related to the current_user.
+  """
+  currentUserContext: OrgCurrentUserContext!
+  customerDisplayName: String
+  featureAccesses: [FeatureAccess!]
+  id: Int!
+  kind: String
+  name: String
+
+  """
+  Next billing date for upcoming SaaS payment
+  """
+  nextBillingDate: ISO8601DateTime
+  parentId: Int
+  partner: Partner
+
+  """
+  The plan this org is on. Only available for org admins
+  """
+  plan: Plan
+
+  """
+  Whether a plan is on a yearly or monthly billing cycle
+  """
+  planBillingCycle: String
+  preferences: OrgPreferences
+  updatedAt: ISO8601DateTime
+
+  """
+  A list of users which have access to this org ordered by user.createdAt in descending order.
+  """
+  users(page: Int = 1, perPage: Int = 50): UserBasicInfoPaginatedResults!
+  usersCount: Int!
+
+  """
+  This Org's Wallet
+  """
+  wallet: Wallet
+}
+
+"""
+Arguments for creating/updating an org
+"""
+input OrgArgs {
+  name: String!
+}
+
+type OrgBasePrice implements ApplicationRecord {
+  billingCycle: String!
+  createdAt: ISO8601DateTime
+  goodType: String!
+  id: Int!
+  partnerSubsidy: Int!
+  planId: Int!
+
+  """
+  Price in cents
+  """
+  price: Int!
+  updatedAt: ISO8601DateTime
+}
+
+type OrgBasicInfo implements ApplicationRecord & OrgNames {
+  createdAt: ISO8601DateTime
+  customerDisplayName: String
+  id: Int!
+  name: String
+
+  """
+      Unique code used for putting users in a specific org on signup. Refer
+      to the orgCode argument in createHomeowner/createProUser mutations.
+  """
+  orgCode: OrgCode
+  updatedAt: ISO8601DateTime
+}
+
+"""
+          Paginated results for a given type. Total pages or count is not provided. Instead, an hasNextPage boolean is
+          provided.
+"""
+type OrgBasicInfoPaginatedResults {
+  pagination: PaginationWithoutCount
+  results: [OrgBasicInfo]
+}
+
+type OrgCode {
+  code: String
+}
+
+type OrgCurrentUserContext {
+  """
+      Return the aclTemplate the current_user has for this org.
+  """
+  aclTemplate: ACLTemplateOptions
+
+  """
+      Return true if the user should be cc'ed on all emails within the org.
+
+      This field will only have effect for Org admin.
+  """
+  ccAdminOnEmails: Boolean
+}
+
+interface OrgNames {
+  customerDisplayName: String
+  name: String
+}
+
+type OrgPreferences implements ApplicationRecord {
+  createdAt: ISO8601DateTime
+  externalIdentifierLabel: String
+  externalIdentifierRequired: Boolean
+  id: Int!
+  updatedAt: ISO8601DateTime
+}
+
+"""
+Arguments for creating a user under a specific org
+"""
+input OrgUserCreateArgs {
+  email: String!
+  firstName: String!
+  lastName: String!
+  requireJobApproval: Boolean
+}
+
+type Pagination {
+  currentPage: Int!
+  totalPages: Int!
+}
+
+type PaginationWithoutCount {
+  currentPage: Int!
+  hasNextPage: Boolean!
+}
+
+type Partner implements ApplicationRecord {
+  allowInsuranceDamageCapture: Boolean
+  allowInsuranceUnderwritingCapture: Boolean
+
+  """
+  Indicates whether a partner has co-branding enabled for the App
+  """
+  appCoBrand: Boolean!
+  createdAt: ISO8601DateTime
+  id: Int!
+
+  """
+  Unique identifier for a partner.
+  """
+  identifier: String
+  kind: PartnerKind
+  name: String!
+  updatedAt: ISO8601DateTime
+}
+
+enum PartnerKind {
+  INSURANCE
+  STANDARD
+}
+
+enum PartnersWithAffiliateOrgsIdentifiers {
+  BEACON
+}
+
+type Plan implements ApplicationRecord {
+  createdAt: ISO8601DateTime
+
+  """
+      The number of days that the users in the Org under this plan can access the property information of a job since
+      it's completed. The typical values are 365 or 0. If the value is 0, the access is unlimited.
+  """
+  daysOfHistoricalJobAccess: Int!
+  id: Int!
+  jobBasePrices: [JobBasePrice!]!
+  name: String!
+  orgBasePrices: [OrgBasePrice!]!
+
+  """
+  Base price for HOVER Now
+  """
+  roofEstimateBasePrice: BasePrice!
+  saas: Boolean!
+  tier: String!
+  upchargeBasePrices: [UpchargeBasePrice!]!
+  updatedAt: ISO8601DateTime
+}
+
+type Profile {
+  user: User!
+}
+
+type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
+
+  """
+      Returns all orgs with kind affiliate under the given partner. 
+  """
+  affiliateOrgsForPartner(
+    page: Int = 1
+    partnerIdentifier: PartnersWithAffiliateOrgsIdentifiers!
+    perPage: Int = 50
+
+    """
+        Filter orgs by search text. Minimum 3 characters required. if search
+        text with length below the minimum is given, it will return an empty array. Orgs can be searched by
+        name, ancestral_name, id, or external_partner_identifier.
+    """
+    search: String
+  ): OrgBasicInfoPaginatedResults!
+
+  """
+      Returns all deliverables that exist in our database. Each org may have restriction on which deliverables are
+      allowed. Please refer to availableDeliverables under Org object.
+  """
+  deliverables: [Deliverable!]!
+  jobs(
+    createdAfter: ISO8601DateTime
+    createdBefore: ISO8601DateTime
+
+    """
+    Filter jobs by JobSearchFilters.
+    """
+    filters: [JobSearchFilters!] = []
+
+    """
+        Accepts an array of job ids. Max limit is 50 ids. If an array
+        of more than 50 ids is given, only the first
+        50 ids will be used.
+    """
+    ids: [Int!]
+    page: Int = 1
+    perPage: Int = 50
+
+    """
+        Filter jobs by search text. Minimum 3 characters required. If search text with length
+        below the minimum is given, it'll return an empty array.
+    """
+    search: String
+    updatedAfter: ISO8601DateTime
+    viewableBy: JobsViewableBy = ALL
+  ): JobPaginatedResults!
+  profile: Profile!
+}
+
+type RoofEstimate implements ApplicationRecord {
+  createdAt: ISO8601DateTime
+  id: Int!
+
+  """
+  The pitch of the roof formatted as x/12
+  """
+  predominantPitch: String
+
+  """
+  The total area of the roof measured in roof squares
+  """
+  totalRoofSquares: String
+  updatedAt: ISO8601DateTime
+}
+
+enum RoofEstimateAccessLevels {
+  INSTANT
+  INSTANT_UNSUPPORTED
+  NONE
+  REFINED
+  REFINED_UNSUPPORTED
+  VERIFIED_REFINED
+}
+
+type UpchargeBasePrice implements ApplicationRecord {
+  createdAt: ISO8601DateTime
+  goodType: String!
+  id: Int!
+  partnerSubsidy: Int!
+  planId: Int!
+
+  """
+  Price in cents
+  """
+  price: Int!
+  upchargeKind: String!
+  updatedAt: ISO8601DateTime
+}
+
+type User implements ApplicationRecord & UserNames {
+  aclAccesses(limit: Int = 50): [ACLAccess!]!
+
+  """
+  A list of capture requests where this user is the capturing user.
+  """
+  captureRequests(page: Int = 1, perPage: Int = 50, states: [CaptureRequestStates!] = [NEW, CONNECTED]): CaptureRequestPaginatedResults!
+  createdAt: ISO8601DateTime
+  email: String!
+  firstName: String
+  id: Int!
+
+  """
+  SHA used for verifying user identification in Intercom communication
+  """
+  intercomSha: String!
+  isHomeowner: Boolean
+
+  """
+  Indicates if the user account is a test account
+  """
+  isTestData: Boolean
+  lastName: String
+  mobilePhone: String
+  name: String
+  officePhone: String
+  orgs(first: Int = 50, ids: [Int!], last: Int = 50): [Org!]!
+
+  """
+      Returns true if the user is a HOVER prospect and jobs must be approved by an Org admin.
+
+      Note: HOVER Now is an exception and this field will be ignored.
+  """
+  requireJobApproval: Boolean
+  state: UserStates
+  timeZone: String
+  updatedAt: ISO8601DateTime
+  uploadSecret: String
+}
+
+"""
+Arguments for creating a user
+"""
+input UserArgs {
+  appLogin: Boolean
+  branchMatchIdentifier: String
+  captureRequestIdentifier: String
+  email: String!
+  firstName: String
+  lastName: String
+  marketingCampaignIdentifier: String
+  mobilePhone: String
+  officePhone: String
+  password: String!
+  passwordConfirmation: String!
+  preferredIdentifier: String
+  requireJobApproval: Boolean
+  timeZone: String
+  vip: Boolean
+}
+
+type UserBasicInfoPaginatedResults implements ApplicationRecord & UserNames {
+  """
+        Return the aclTemplate this user has for the given orgId. Return null if org not found or this user does not have
+        access to this org.
+  """
+  aclTemplateForOrgId(orgId: Int!): ACLTemplateOptions
+  createdAt: ISO8601DateTime
+  email: String!
+  firstName: String
+  id: Int!
+  jobsCount: Int!
+  lastName: String
+  name: String
+
+  """
+  A list of orgs which this user has access to. Basic info only.
+  """
+  orgs(page: Int = 1, perPage: Int = 50): OrgBasicInfoPaginatedResults!
+
+  """
+      Returns true if the user is a HOVER prospect and jobs must be approved by an Org admin.
+
+      Note: HOVER Now is an exception and this field will be ignored.
+  """
+  requireJobApproval: Boolean
+  state: UserStates
+  updatedAt: ISO8601DateTime
+}
+
+"""
+          Paginated results for a given type. Total pages or count is not provided. Instead, an hasNextPage boolean is
+          provided.
+"""
+type UserBasicInfoPaginatedResultsPaginatedResults {
+  pagination: PaginationWithoutCount
+  results: [UserBasicInfo]
+}
+
+interface UserNames {
+  firstName: String
+  lastName: String
+  name: String
+}
+
+enum UserStates {
+  ACTIVATED
+  ARCHIVED
+  INVITED
+  WAITING_ACTIVATION
+}
+
+"""
+Arguments for updating a user.
+"""
+input UserUpdateArgs {
+  firstName: String
+  lastName: String
+  mobilePhone: String
+  officePhone: String
+  requireJobApproval: Boolean
+}
+
+"""
+Only Org admins are authorized to view this. Returns null for other users.
+"""
+type Wallet implements ApplicationRecord {
+  billingAddressCity: String
+  billingAddressCountry: String
+  billingAddressLine1: String
+  billingAddressLine2: String
+  billingAddressPostalCode: String
+  billingAddressRegion: String
+  billingEmail: String
+  cardBrand: String
+  cardExpiresOn: ISO8601DateTime
+  cardLast4: String
+  cardholderName: String
+  createdAt: ISO8601DateTime
+  id: Int!
+
+  """
+  Available wallet balance/HOVER credits.
+  """
+  totalBalance: Int
+  updatedAt: ISO8601DateTime
+}
+
+"""
+Arguments for creating or updating a wallet
+"""
+input WalletArgs {
+  billingAddressCity: String
+  billingAddressCountry: String
+  billingAddressLine1: String
+  billingAddressLine2: String
+  billingAddressPostalCode: String
+  billingAddressRegion: String
+  billingEmail: String
+  cardBrand: String
+  cardExpiresOn: String
+  cardLast4: String
+  cardholderName: String
+  stripeToken: String
+}
+
+scalar _Any
+
+union _Entity = Job
+
+"""
+The sdl representing the federated service capabilities. Includes federation
+directives, removes federation types, and includes rest of full schema after
+schema directives have been applied
+"""
+type _Service {
+  sdl: String
+}
